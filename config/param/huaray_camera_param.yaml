@@ -11,7 +11,7 @@ RuntimeParam:
   # 是否在线运行(布尔型)；在线运行：1，离线运行：0
   IsOnline: 1
   # 是否录像(布尔型)；录像：1，不录像：0
-  IsRecordVideo: 1
+  IsRecordVideo: 0
   # 录像质量(整型)；取值范围：[1, 100]
   RecordVideoQuality: 50
   # 离线视频文件名称(字符串)

@@ -163,7 +163,7 @@ void detectCallback(const sensor_msgs::PointCloud2::ConstPtr &rosPCLMsg, const c
         carWorldInfo.second = CoordinateTransformer::CarWorldCoordination(carPixelCoordination,
                                                                            pointsData,
                                                                            pixelCoordinates,
-                                                                           1);
+                                                                           232);
 
 //        // z值突变，若前后两帧z值超过一定阈值，更新后一帧的z为前一帧的z，z值用世界坐标系的
 //        for (auto& entry : prevZValues) {
