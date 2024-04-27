@@ -1,0 +1,23 @@
+%YAML:1.0
+---
+
+# 串口标识字符串
+Key: 'ttyUSB0'
+# 串口文件名称
+Name: '/dev/ttyUSB0'
+# 波特率；必须指定标准波特率
+BaudRate: 500000
+# 数据位；Five:5; Six:6; Seven:7; Eight:8
+DataBits: 8
+# 停止位；One:1; Tow:2
+StopBits: 1
+# 校验位；None:0; Odd:1; Even:2; Mark:3; Space:4
+Parity: 0
+# 流控；None:0; Software:1; Hardware:2
+FlowControl: 0
+# 读取缓冲区长度
+ReadBufferSize: 1024
+# 写入缓冲区长度
+WriteBufferSize: 1024
+# 数据帧分隔符
+Separators: [221]

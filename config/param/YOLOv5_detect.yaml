@@ -1,0 +1,32 @@
+%YAML:1.0
+---
+
+# YOLOv5的检测car模型路径
+YOLOv5CarModelPath: /home/zhangtianyi/document/radar_ws/src/cubot_radar/config/model/best.onnx
+
+# YOLOv5的检测装甲板的模型路径
+YOLOv5ArmorModelPath: /home/zhangtianyi/document/radar_ws/src/cubot_radar/config/model/armor.onnx
+
+
+# YOLOv5的识别类别路径
+# YOLOv5NamePath: /home/zhangtianyi/test_ws/src/cubot_radar/config/param/detect_classes.txt
+
+# YOLOv5的识别装甲板类别路径
+#YOLOv5ArmorNamePath: /home/zhangtianyi/test_ws/src/cubot_radar/config/param/detect_car_classes.txt
+
+# YOLOv5的识别装甲板类别路径
+#YOLOv5ArmorNamePath: /home/zhangtianyi/文档/radar_ws/src/cubot_radar/config/param/detect_armor_classes.txt
+
+# YOLOv5的置信度阈值
+YOLOv5ConfThres: 0.41
+
+# YOLOv5的iou区域阈值
+YOLOv5IouThres: 0.28
+
+
+# 位置预测的MLP模型路径
+#PositionMlpPath: /home/zhangtianyi/test_ws/src/cubot_radar/config/model/position_mlp_radar.pt
+
+# 读取视频路径
+VideoPath: /home/zhangtianyi/test_ws/src/cubot_radar/data/data1/video/2021-09-17/new1.mp4
+#VideoPath: /home/zhangtianyi/car2.mp4

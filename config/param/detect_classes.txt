@@ -1,0 +1,6 @@
+car
+armor_red1
+armor_red2
+armor_blue1
+armor_blue2
+gray_car

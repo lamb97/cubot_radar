@@ -1,0 +1,113 @@
+%YAML:1.0
+---
+
+# -----     华睿相机的标识字符串     -----
+// Key: 'Huaray Technology:4H022F8PAKD4073'
+Key: 'Huaray Technology:BA12121AAK00017'
+
+# -----     华睿相机的运行参数     -----
+RuntimeParam:
+  # 是否在线运行(布尔型)；在线运行：1，离线运行：0
+  IsOnline: 1
+  # 是否录像(布尔型)；录像：1，不录像：0
+  IsRecordVideo: 0
+  # 录像质量(整型)；取值范围：[1, 100]
+  RecordVideoQuality: 50
+  # 离线视频文件名称(字符串)
+  OfflineVideoName: '/home/zhangtianyi/Documents/cubot_radar/data/video/2021-09-05/blue2.avi'
+  # 录像文件存储路径(字符串)，必须以“/”结尾
+  RecordVideoPath: '/home/zhangtianyi/Documents/cubot_radar/data/video/'
+
+# -----     华睿相机的模型参数     -----
+ModelParam:
+  # 华睿相机OpenCv格式的内参矩阵
+  CvInternalMatrix: !!opencv-matrix
+    rows: 3
+    cols: 3
+    dt: d
+    data: [1698.958975223381, 0,   631.8037919020867,
+           0,   1746.399810836588, 475.5725652165379,
+           0,         0,          1]
+
+  # 华睿相机与Livox雷达的OpenCv格式的外参矩阵
+  CvExternalMatrix: !!opencv-matrix
+    rows: 4
+    cols: 4
+    dt: d
+    data: [0.0297727, -0.999191, 0.0270377, -0.0683641,
+           0.0233284, -0.0263477,-0.999381, -0.0383443,
+           0.999284, 0.030385,0.0225251 ,  0.266673,
+           0,       0,        0,       1]
+
+  # 华睿相机OpenCv格式的畸变校正向量
+  CvDistortionVector: !!opencv-matrix
+    rows: 5
+    cols: 1
+    dt: d
+    data: [-0.06313426661241854, 0.3350115679297196, -0.006893114456895558,-0.0007447726625650869, -2.897041980749208]
+
+# -----     华睿相机的硬件参数     -----
+HardwareParams:
+ -
+   # 相机硬件参数适配的场景；1-击打敌人，2-击打Buff
+   Scene: 1
+   # 帧率(浮点型)；取值范围：[1, 2000]
+   FrameRate: 200.0
+   # 是否自动曝光(布尔型)；自动曝光：1，非自动曝光：0
+   IsExposureAuto: 0
+   # 曝光时间(浮点型)；取值范围：
+   ExposureTime:10000.0
+   # 增益值(浮点型)；取值范围：[1, 32]
+   GainRaw: 4.0
+   # 伽马值(浮点型)；取值范围：[0, 3.99998]
+   Gamma: 0.58
+   # 是否自动白平衡(布尔型)；自动白平衡：1，非自动白平衡：0
+   IsWhiteBalanceAuto: 1
+   # 红色平衡率(浮点型)；取值范围：[0, 15]
+   BalanceRatio_R: 1.0
+   # 绿色平衡率(浮点型)；取值范围：[0, 15]
+   BalanceRatio_G: 1.0
+   # 蓝色平衡率(浮点型)；取值范围：[0, 15]
+   BalanceRatio_B: 1.0
+   # 图像宽度(整型)；取值范围：[128, 1280]
+   Width: 1280
+   # 图像高度(整型)；取值范围：[64, 1024]
+   Height: 1024
+   # X轴偏移(整型)；取值范围：[0, 280]
+   Offset_X: 0
+   # Y轴偏移(整型)；取值范围：[0, 224]
+   Offset_Y: 0
+   # 相机亮度(整型)；取值范围：[0, 100]
+   Brightness: 50
+
+ -
+   # 相机硬件参数适配的场景；1-击打敌人，2-击打Buff
+   Scene: 2
+   # 帧率(浮点型)；取值范围：[1, 2000]
+   FrameRate: 200.0
+   # 是否自动曝光(布尔型)；自动曝光：1，非自动曝光：0
+   IsExposureAuto: 0
+   # 曝光时间(浮点型)；取值范围：
+   ExposureTime: 10000.0
+   # 增益值(浮点型)；取值范围：[1, 32]
+   GainRaw: 1.5
+   # 伽马值(浮点型)；取值范围：[0, 3.99998]
+   Gamma: 1.0
+   # 是否自动白平衡(布尔型)；自动白平衡：1，非自动白平衡：0
+   IsWhiteBalanceAuto: 1
+   # 红色平衡率(浮点型)；取值范围：[0, 15]
+   BalanceRatio_R: 1.0
+   # 绿色平衡率(浮点型)；取值范围：[0, 15]
+   BalanceRatio_G: 1.0
+   # 蓝色平衡率(浮点型)；取值范围：[0, 15]
+   BalanceRatio_B: 1.0
+   # 图像宽度(整型)；取值范围：[128, 1280]
+   Width: 1280
+   # 图像高度(整型)；取值范围：[64, 1024]
+   Height: 1024
+   # X轴偏移(整型)；取值范围：[0, 280]
+   Offset_X: 0
+   # Y轴偏移(整型)；取值范围：[0, 224]
+   Offset_Y: 0
+   # 相机亮度(整型)；取值范围：[0, 100]
+   Brightness: 60
