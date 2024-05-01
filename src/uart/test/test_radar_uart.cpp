@@ -206,6 +206,23 @@ void detectCallback(const sensor_msgs::PointCloud2::ConstPtr &rosPCLMsg, const c
 //    std::cout << "[" << timestamp << "] - data = " << (char*)receivedBuffer << std::endl;
 //}
 
+// 回调函数，处理接收到的车辆信息
+void carsCallback(const cubot_radar::CarsMsg::ConstPtr& msg)
+{
+    // 输出接收到的车辆信息
+    ROS_INFO("Received car information. Number of cars: %d", msg->carNum);
+    
+    // 遍历每辆车并输出其世界坐标
+    for (int i = 0; i < msg->carNum; ++i)
+    {
+        ROS_INFO("Car %d: Class: %d, World Coordinates: (%f, %f, %f)",
+                 i+1, msg->carsInfo[i].carClass,
+                 msg->carsInfo[i].carWorldX,
+                 msg->carsInfo[i].carWorldY,
+                 msg->carsInfo[i].carWorldZ);
+    }
+}
+
 
 int main(int argc, char** argv) {
     // 创建串口
