@@ -240,36 +240,15 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // ros节点初始化
+    // 初始化ROS节点
     ros::init(argc, argv, "uart_subscriber");
 
     // 创建ros句柄
     ros::NodeHandle nh;
-    //ros::Subscriber livoxSub2 = nh.subscribe();
-    // 定义一个接受点云话题信息的消息过滤器
-    message_filters::Subscriber<sensor_msgs::PointCloud2> pointCloudSub(nh, "livox/lidar", 5);
-
-    // 定义一个接受自定义车辆话题信息的消息过滤器
-    message_filters::Subscriber<cubot_radar::CarsMsg> carsMsgSub(nh, "carsInfo", 5);
+    ros::Subscriber sub = nh.subscribe("cars", 10, carsCallback);
 
     // 设置循环频率
     ros::Rate loopRate(5);
-
-    // 定义消息同步器的机制为大致时间同步.
-    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, cubot_radar::CarsMsg> MySyncPolicy;
-
-    // 定义时间同步器的消息队列大小和接收话题
-    message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(80), pointCloudSub, carsMsgSub);
-
-
-
-    // 注册回调函数
-    sync.registerCallback(boost::bind(&detectCallback, _1, _2));
-
-
-
-    // 注册串口的数据接收回调函数
-    //serialPort.RegistDataReceivedHandler(HandleDataReceived, &serialPort);
 
     // 初始化串口
     if (!serialPort.Init()) {
@@ -281,36 +260,20 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-
     // 初始化控制指令
     RobotCommand command;
 
+    // 在ROS节点仍在运行时执行循环
     while (ros::ok()) {
+        // ros消息回调处理函数
+        ros::spinOnce();
+
         //给ID X Y Z赋值
         command.ID = target_robot_ID;
         command.X = target_position_x;
         command.Y = target_position_y;
         command.Z = target_position_z;
 
-////        红方只发送5-9
-//        if (command.ID > 4) {
-//            if (command.X > 0.0 && command.Y > 0.0 && command.Z > 0.0) {
-//                // 生成控制指令数据帧
-//                unsigned int commandFrameSize = RobotCommand::GetFrameSize();
-//                unsigned char commandFrame[commandFrameSize];
-//                command.EncapsulateToFrame(commandFrame);
-//
-//                // 将指令数据帧发送给下位机
-//                serialPort.Write(commandFrameSize, commandFrame);
-//
-//                // ros消息回调处理函数
-//                ros::spinOnce();
-//                loopRate.sleep();
-//            }
-//
-//        }
-
-        //蓝方只发送0-4
         if (command.ID < 5) {
             if (command.X > 0.0 && command.Y > 0.0 && command.Z > 0.0) {
                 // 生成控制指令数据帧
@@ -320,21 +283,18 @@ int main(int argc, char** argv) {
 
                 // 将指令数据帧发送给下位机
                 serialPort.Write(commandFrameSize, commandFrame);
-
-                // ros消息回调处理函数
-                ros::spinOnce();
-                loopRate.sleep();
             }
         }
 
-        // 关闭串口
-        serialPort.Close();
-
-        // 释放串口资源
-        serialPort.Release();
-
-        //ros消息回调处理函数
-        //ros::spin();
-        return 0;
+        // 控制循环频率
+        loopRate.sleep();
     }
+
+    // 关闭串口
+    serialPort.Close();
+
+    // 释放串口资源
+    serialPort.Release();
+
+    return 0;
 }
