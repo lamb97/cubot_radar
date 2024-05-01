@@ -165,39 +165,6 @@ void detectCallback(const sensor_msgs::PointCloud2::ConstPtr &rosPCLMsg, const c
                                                                            pixelCoordinates,
                                                                            232);
 
-//        // z值突变，若前后两帧z值超过一定阈值，更新后一帧的z为前一帧的z，z值用世界坐标系的
-//        for (auto& entry : prevZValues) {
-//            if (entry.first == carWorldInfo.first) {
-//                // 检查是否是第一帧，如果是，直接更新prevZValues
-//                if (receiveFrequency == 1) {
-//                    entry.second = carWorldInfo.second.z;
-//                } else {
-//                    double zThreshold = 1.0;    // 阈值，用于判断是否进行z值更新
-//                    double zDifference = std::abs(carWorldInfo.second.z - entry.second);
-//                    if (zThreshold < zDifference) {
-//                        carWorldInfo.second.z = entry.second;
-//                        // z值更新带来的世界坐标系转化
-//                        // 舍弃相机坐标系的奇次坐标
-//                        cv::Mat carCameraPoint =  (cv::Mat_<double>(3, 1) <<
-//                                                   CoordinateTransformer::average_cameraPoint.at<double>(0),
-//                                                   CoordinateTransformer::average_cameraPoint.at<double>(1),
-//                                                   CoordinateTransformer::average_cameraPoint.at<double>(2));
-//                        double ratio = (entry.second - carCameraPoint.at<double>(2)) /
-//                                       (carWorldInfo.second.z - carCameraPoint.at<double>(2));
-//                        //世界坐标系从cv::point3d变到cv::Mat
-//                        cv::Mat carWorldMat = (cv::Mat_<double>(3, 1) << carWorldInfo.second.x, carWorldInfo.second.y, carWorldInfo.second.z);
-//                        // 上交的修正公式
-//                        cv::Mat carWorldMat_modify = ratio * (carWorldMat-carCameraPoint) + carCameraPoint;
-//                        cv::Point3d carWorld3d_modify{carWorldMat_modify.at<double>(0), carWorldMat_modify.at<double>(1), carWorldMat_modify.at<double>(2)};
-//                        carWorldInfo.second = carWorld3d_modify;
-//                    }
-//                    // 更新prevZValues为当前帧的z值
-//                    entry.second = carWorldInfo.second.z;
-//                }
-//                break;
-//            }
-//        }
-
         //carsMsgs.carsInfo[i].armorNum = carsMsg->carsInfo[i].armorNum;
         carsMsgs.carsInfo[i].carClass = carsMsg->carsInfo[i].carClass;
         carsMsgs.carsInfo[i].carWorldX = carWorldInfo.second.x;
