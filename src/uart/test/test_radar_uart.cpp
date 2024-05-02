@@ -26,192 +26,18 @@
 #include "cubot_radar/CarsMsg.h"
 #include "camera_radar_matrix_param.h"
 #include "coordinate_transformer.h"
-
-// 串口数据接收缓冲区
-//unsigned char receivedBuffer[1000];
 u_char data[13];
 
 int16_t target_robot_ID;
 float target_position_x;
 float target_position_y;
 float target_position_z;
-
-//ros数据回调函数
-void detectCallback(const sensor_msgs::PointCloud2::ConstPtr &rosPCLMsg, const cubot_radar::CarsMsg::ConstPtr &carsMsg)
-{
-    int receiveFrequency = 0;
-    cubot_radar::CarsMsg carsMsgs;
-    // 接收到话题消息，进入回调函数
-    receiveFrequency ++;
-    ROS_INFO("Received the fuseMsg %i times", receiveFrequency);
-
-    // 将sensor_msgs/Image格式转换为OpenCV格式
-    boost::shared_ptr<cv_bridge::CvImage> getImage = cv_bridge::toCvCopy(carsMsg->image, "bgr8");
-    cv::Mat subImage = getImage->image;
-
-    CameraRadarMatrix matrixParam;
-    std::string yamlFile = "/home/zhangtianyi/test_ws/src/cubot_radar/config/param/camera_radar_matrix_param.yaml";
-    CameraRadarMatrixParam::LoadFromYamlFile(yamlFile, &matrixParam);
-
-    cv::Mat cameraMatrix = matrixParam.CameraMatrix;
-    cv::Mat internalMatrix = matrixParam.InternalMatrix;
-    cv::Mat distCoeffs = matrixParam.DistortionVector;
-    cv::Mat externalMatrix = matrixParam.ExternalMatrix;
-
-    // 将rosPCL数据转换为PCL点云数据
-    pcl::PCLPointCloud2 PCLCloud;
-    pcl_conversions::toPCL(*rosPCLMsg, PCLCloud);
-
-    // 将PCL点云数据转换为有点坐标和强度信息的PCLXYZI数据
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);  //点云指针对象
-    pcl::fromPCLPointCloud2(PCLCloud, *cloud);
-
-    // 使用相机的内参和畸变系数修正图片
-    cv::Mat remap;
-    cv::Mat map1;
-    cv::Mat map2;
-    remap = subImage.clone();
-    cv::Size imageSize = subImage.size();
-    cv::initUndistortRectifyMap(cameraMatrix, distCoeffs, cv::Mat(),
-                                cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 1, imageSize, nullptr),
-                                imageSize, CV_16SC2, map1, map2);
-    // 畸变校正
-    cv::remap(subImage, remap, map1, map2, cv::INTER_LINEAR);
-
-    auto pointNum = (int)cloud->points.size();
-
-    cv::Mat pointsData(4, pointNum, CV_64F);
-
-    for (int i = 0; i < pointNum; ++i) {
-
-        float x = cloud->points[i].x;
-        float y = cloud->points[i].y;
-        float z = cloud->points[i].z;
-
-        pointsData.at<double>(0, i) = x;
-        pointsData.at<double>(1, i) = y;
-        pointsData.at<double>(2, i) = z;
-        pointsData.at<double>(3, i) = 1;
-    }
-
-    // 将点云世界坐标转为像素坐标
-    std::vector<cv::Point2i> pixelCoordinates;
-    CoordinateTransformer::WorldToPixel(internalMatrix, externalMatrix, pointsData, &pixelCoordinates);
-
-
-    // 给点云赋BGR值
-    std::vector<cv::Point3i> BGRValue;
-    CoordinateTransformer::ColoredPointCloud(pixelCoordinates, subImage, &BGRValue);
-
-    for (int i = 0; i < pointNum; ++i){
-
-        // 忽视无效的点
-        if (pointsData.at<double>(0, i) == 0 && pointsData.at<double>(1, i) == 0 && pointsData.at<double>(2, i) == 0) {
-            continue;
-        }
-        // 忽视BGR值都为0的点
-        if (BGRValue[i].x == 0 && BGRValue[i].y == 0 && BGRValue[i].z == 0) {
-            continue;
-        }
-        // 给点云赋予XYZ的值
-        cloud->points[i].x = (float)pointsData.at<double>(0, i);
-        cloud->points[i].y = (float)pointsData.at<double>(1, i);
-        cloud->points[i].z = (float)pointsData.at<double>(2, i);
-
-        // 给点云赋予BGR值（给点云赋值的操作需要一个循环里进行，才能完成点的对应）
-        cloud->points[i].r = BGRValue[i].z;
-        cloud->points[i].g = BGRValue[i].y;
-        cloud->points[i].b = BGRValue[i].x;
-    }
-
-
-    // 存放单帧图像车辆类别和世界坐标的容器
-    std::vector<std::pair<int, cv::Point3d>> carsWorldInfo;
-
-    carsMsgs.image = carsMsg->image;
-    carsMsgs.carNum = carsMsg->carNum;
-    carsMsgs.carsInfo.resize(carsMsg->carNum);
-
-
-    ros::Rate loopRate(5);
-    for(int i = 0; i < carsMsg->carNum; i++){
-        // 单个车辆的类别和世界坐标
-        std::pair<int, cv::Point3d> carWorldInfo;
-
-        // 车辆图像中心点坐标
-        cv::Point2i carPixelCoordination((int)carsMsg->carsInfo[i].carX, (int)carsMsg->carsInfo[i].carY);
-
-        // 单个车辆的类别
-        carWorldInfo.first = carsMsg->carsInfo[i].carClass;
-
-        std::cout << "(" <<  carWorldInfo.first << ")" <<std::endl;
-
-        // 计算单个车辆的世界坐标
-        carWorldInfo.second = CoordinateTransformer::CarWorldCoordination(carPixelCoordination,
-                                                                          pointsData,
-                                                                          pixelCoordinates,
-                                                                          5);
-
-        //carsMsgs.carsInfo[i].armorNum = carsMsg->carsInfo[i].armorNum;
-        carsMsgs.carsInfo[i].carClass = carsMsg->carsInfo[i].carClass;
-        carsMsgs.carsInfo[i].carWorldX = carWorldInfo.second.x;
-        carsMsgs.carsInfo[i].carWorldY = carWorldInfo.second.y;
-        carsMsgs.carsInfo[i].carWorldZ = carWorldInfo.second.z;
-
-        std::cout << "(" << carsMsgs.carsInfo[i].carWorldX << "," << carsMsgs.carsInfo[i].carWorldY << "," << carsMsgs.carsInfo[i].carWorldZ << ")" << std::endl;
-
-        carsWorldInfo.emplace_back(carWorldInfo);
-    }
-
-    ROS_INFO("Finish all the process %i times", receiveFrequency);
-
-    ROS_INFO("Car: %i", carsMsgs.carNum);
-
-    loopRate.sleep();
-
-   if(!carsWorldInfo.empty())
-   {
-       ROS_INFO("Car: %i", carsWorldInfo[0].first);
-       ROS_INFO("Car in: %f %f %f", carsWorldInfo[0].second.x, carsWorldInfo[0].second.y, carsWorldInfo[0].second.z);
-
-//    auto car = (int16_t)carsWorldInfo[0].first;
-//    robot_command.target_position_x = (int16_t)carsWorldInfo[0].second.x;
-//    auto position_decimalX = (int16_t)(carsWorldInfo[0].second.x/1*100)/1;
-//    auto position_integerY = (int16_t)carsWorldInfo[0].second.x/1;
-//    auto position_decimalY = (int16_t)(carsWorldInfo[0].second.x/1*100)/1;
-//    auto position_integerZ = (int16_t)carsWorldInfo[0].second.x/1;
-//    auto position_decimalZ = (int16_t)(carsWorldInfo[0].second.x/1*100)/1;
-       target_robot_ID = (int16_t)carsWorldInfo[0].first;
-       target_position_x = (float)carsWorldInfo[0].second.x;
-       target_position_y = (float)carsWorldInfo[0].second.y;
-       target_position_z =  (float)carsWorldInfo[0].second.z;
-   }
-
-}
-
-
-// //串口数据接收回调函数
-//void HandleDataReceived(const unsigned int &bytesToRead, void* userData)
-//{
-//    // 读取一行数据
-//    auto *serialPort = (SerialPort *)userData;
-//    unsigned char size = serialPort->ReadLine(receivedBuffer);
-//    receivedBuffer[size] = '\0';
-//
-//    // 记录接收到的时间戳
-//    std::chrono::time_point<std::chrono::steady_clock> now = std::chrono::steady_clock::now();
-//    uint64_t timestamp = now.time_since_epoch().count();
-//
-//    // 显示读取到的数据
-//    std::cout << "[" << timestamp << "] - data = " << (char*)receivedBuffer << std::endl;
-//}
-
 // 回调函数，处理接收到的车辆信息
 void carsCallback(const cubot_radar::CarsMsg::ConstPtr& msg)
 {
     // 输出接收到的车辆信息
     ROS_INFO("Received car information. Number of cars: %d", msg->carNum);
-    
+
     // 遍历每辆车并输出其世界坐标
     for (int i = 0; i < msg->carNum; ++i)
     {
@@ -220,6 +46,10 @@ void carsCallback(const cubot_radar::CarsMsg::ConstPtr& msg)
                  msg->carsInfo[i].carWorldX,
                  msg->carsInfo[i].carWorldY,
                  msg->carsInfo[i].carWorldZ);
+        target_robot_ID = (int16_t)msg->carsInfo[i].carClass;
+        target_position_x = (float)msg->carsInfo[i].carWorldX;
+        target_position_y = (float)msg->carsInfo[i].carWorldY;
+        target_position_z = (float)msg->carsInfo[i].carWorldZ;
     }
 }
 
@@ -273,7 +103,24 @@ int main(int argc, char** argv) {
         command.X = target_position_x;
         command.Y = target_position_y;
         command.Z = target_position_z;
+//        红方只发送5-9
+        if (command.ID > 4) {
+            if (command.X > 0.0 && command.Y > 0.0 && command.Z > 0.0) {
+                // 生成控制指令数据帧
+                unsigned int commandFrameSize = RobotCommand::GetFrameSize();
+                unsigned char commandFrame[commandFrameSize];
+                command.EncapsulateToFrame(commandFrame);
 
+                // 将指令数据帧发送给下位机
+                serialPort.Write(commandFrameSize, commandFrame);
+
+                // ros消息回调处理函数
+                ros::spinOnce();
+                loopRate.sleep();
+            }
+
+        }
+        //蓝方
         if (command.ID < 5) {
             if (command.X > 0.0 && command.Y > 0.0 && command.Z > 0.0) {
                 // 生成控制指令数据帧
