@@ -6,7 +6,7 @@ Key: 'ttyUSB0'
 # 串口文件名称
 Name: '/dev/ttyUSB0'
 # 波特率；必须指定标准波特率
-BaudRate: 500000
+BaudRate: 115200
 # 数据位；Five:5; Six:6; Seven:7; Eight:8
 DataBits: 8
 # 停止位；One:1; Tow:2
