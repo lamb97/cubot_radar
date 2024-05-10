@@ -14,9 +14,10 @@ void CoordinateTransformer::WorldToPixel(const cv::Mat &internalMatrix,
     cv::Mat result = internalMatrix * externalMatrix * pointsDatas;
     cv::Point2i singlePoint;
     for(int i = 0; i < result.cols; i++) {
-        auto u = (float)result.at<double>(0, i);
-        auto v = (float)result.at<double>(1, i);
-        auto depth = (float)result.at<double>(2, i);
+        auto n_x = (float)result.at<double>(0, i) / (float)result.at<double>(2, i);
+        auto n_y = (float)result.at<double>(1, i) / (float)result.at<double>(2, i);
+        auto n_z = 1;
+        cv::Mat resultEnd = 
         singlePoint.x = (int)(u / depth);
         singlePoint.y = (int)(v / depth);
         pixelCoordinates->push_back(singlePoint);
