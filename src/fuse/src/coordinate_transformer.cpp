@@ -17,9 +17,12 @@ void CoordinateTransformer::WorldToPixel(const cv::Mat &internalMatrix,
         auto n_x = (float)result.at<double>(0, i) / (float)result.at<double>(2, i);
         auto n_y = (float)result.at<double>(1, i) / (float)result.at<double>(2, i);
         auto n_z = 1;
-        cv::Mat resultEnd = 
-        singlePoint.x = (int)(u / depth);
-        singlePoint.y = (int)(v / depth);
+        cv::Mat normalizePoint = 
+        cv::Mat internalMatrix1;
+        internalMatrix.convertTo(internalmatrix1,CV_32F , 1,0)
+        cv::Mat resultEnd = internalMatrix * normalizePoint
+        singlePoint.x = resultEnd.at<double>(0,0);
+        singlePoint.y = resultEnd.at<double>(1,0);
         pixelCoordinates->push_back(singlePoint);
     }
 }
