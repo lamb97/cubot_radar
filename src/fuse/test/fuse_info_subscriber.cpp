@@ -195,7 +195,8 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh;
     // 创建显示窗口
     cv::namedWindow("subImage", cv::WINDOW_NORMAL);
-
+    int index = 0;
+while(index == 0){
     //创建一个转换监听器
     tf::TransformListener tf(ros::Duration(10));
     //创建一个变换关系存储量
@@ -221,6 +222,8 @@ int main(int argc, char** argv) {
     // 输出平移向量、平移向量
     std::cout << "Translation vector:\n" << translation << std::endl;
     std::cout << "Rotation matrix:\n" << rotation3_3 << std::endl;
+    index++;
+}
 
 
     // 定义一个接受点云话题信息的消息过滤器
